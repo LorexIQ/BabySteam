@@ -9,7 +9,7 @@ main = pygame.display.set_mode((400, 400))
 clock = pygame.time.Clock()
 run = True
 
-def addElements(Links='', Names='', count=20, size=20):
+def addElements(Links='', Names='', count=30, size=20):
     board = 0
     Elements = []
     for i in range(count):
@@ -46,10 +46,14 @@ class List:
     def Motion(self, position):
         if position:
             if self.main_pos_sider_serface < 5:
-                self.main_pos_sider_serface += 10
+                self.main_pos_sider_serface += 15
         else:
             if self.main_pos_sider_serface + self.y_max > HEIGHT + 5:
-                self.main_pos_sider_serface -= 10
+                self.main_pos_sider_serface -= 15
+        while self.main_pos_sider_serface > 5:
+            self.main_pos_sider_serface -= 1
+        while self.main_pos_sider_serface + self.y_max < HEIGHT + 5:
+            self.main_pos_sider_serface += 1
 
 
 List_rects = addElements()

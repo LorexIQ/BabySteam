@@ -3,10 +3,14 @@ import os
 
 WIDTH = 190
 HEIGHT = 340
-count = 200
+count = 120
+size_block = 25
 Link = "Images"
 fileList = []
 Position_selected = -1
+
+gradient_color = [0, 0, 0]
+status_gradient = True
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -16,6 +20,33 @@ pygame.init()
 main = pygame.display.set_mode((400, 400))
 clock = pygame.time.Clock()
 run = False
+
+
+def Gradient(step, main_color, grad_color):
+    global gradient_color, status_gradient
+    if main_color == 'R':
+        gradient_color[0] = 255
+    elif main_color == 'G':
+        gradient_color[1] = 255
+    elif main_color == 'B':
+        gradient_color[2] = 255
+    c = 0
+    if grad_color == 'R':
+        c = 0
+    elif grad_color == 'G':
+        c = 1
+    elif grad_color == 'B':
+        c = 2
+    if status_gradient:
+        gradient_color[c] += step
+        if gradient_color[c] > 255:
+            gradient_color[c] = 255
+            status_gradient = False
+    else:
+        gradient_color[c] -= step
+        if gradient_color[c] < 0:
+            gradient_color[c] = 0
+            status_gradient = True
 
 
 def Rounding(roundin, accuracy=".55"):
@@ -28,13 +59,13 @@ def Rounding(roundin, accuracy=".55"):
     return roundoff
 
 
-def addElements(count_el = 0, size=20):
+def addElements(count_el = 0, size=30):
     board = 0
     Elements = []
     for i in range(count_el):
         if i != 0:
             board += 5
-        Elements.append(pygame.Rect(0, board + size * i, HEIGHT, 20))
+        Elements.append(pygame.Rect(0, board + size * i, HEIGHT, size))
     return Elements
 
 
@@ -46,10 +77,11 @@ def ReadDirs(Links, usePath):
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, coords, color, x, y, width, height):
+    def __init__(self, coords, x, y, width, height):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((coords.width, coords.height))
-        self.image.fill(color)
+        self.color = (gradient_color[0], gradient_color[1], gradient_color[2])
+        self.image.fill(self.color)
         self.rect = self.image.get_rect()
         self.rect = coords
         self.x = x
@@ -74,9 +106,9 @@ class Button(pygame.sprite.Sprite):
                 else:
                     self.active = False
         if self.active:
-            self.image.fill(pygame.Color("yellow"))
-        else:
             self.image.fill(pygame.Color("green"))
+        else:
+            self.image.fill(self.color)
 
 class List:
     def __init__(self, win, slider_rect, x, y, width, height, y_max, step, count_elements, Elements, color_button, group):
@@ -91,12 +123,12 @@ class List:
         self.step = step
         self.count_elements = count_elements
         self.Elements = Elements
-        self.color_but = color_button
         self.group = group
 
         if self.Elements:
             for Elem in self.Elements:
-                button = Button(Elem, self.color_but, self.x, self.y, self.width, self.height)
+                Gradient(20, 'B', 'R')
+                button = Button(Elem, self.x, self.y, self.width, self.height)
                 group.add(button)
 
     def draw(self, color):
@@ -131,13 +163,12 @@ class List:
 
 buttons = pygame.sprite.Group()
 
-List_rects = addElements(count)
-size_list_rect = len(List_rects)
-max_y_list_rect = List_rects[size_list_rect - 1].y + 20
+List_rects = addElements(count, size_block)
+max_y_list_rect = List_rects[len(List_rects) - 1].y + size_block
 
 fileList = ReadDirs(fileList, Link)
 slider_win = pygame.Surface((WIDTH, max_y_list_rect))
-List_main = pygame.Surface((WIDTH + 10, HEIGHT + 10))
+List_main = pygame.Surface((WIDTH + 40, HEIGHT + 10))
 getList = List(List_main, slider_win, 5, 5, WIDTH, HEIGHT, max_y_list_rect, 17, count, List_rects, GREEN, buttons)
 
 

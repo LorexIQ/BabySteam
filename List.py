@@ -3,7 +3,7 @@ import os
 
 WIDTH = 190
 HEIGHT = 340
-count = 120
+count = 20
 size_block = 25
 Link = "Images"
 fileList = []
@@ -22,6 +22,16 @@ pygame.init()
 main = pygame.display.set_mode((400, 400))
 clock = pygame.time.Clock()
 run = False
+
+
+def DegreePercent(first_num, last_num, num, type=""):
+    if type == "P":
+        num_pos = (num - first_num) / (last_num - first_num)
+    elif type == "D":
+        num_pos = first_num + num * (last_num - first_num)
+    else:
+        return False
+    return num_pos
 
 
 def Gradient(step, main_color, grad_color):
@@ -91,12 +101,12 @@ class Slider:
         slider_rect = pygame.Rect(self.x, self.y, self.width, self.height)
         pygame.draw.rect(self.win, self.color, slider_rect)
 
-
 class Button(pygame.sprite.Sprite):
-    def __init__(self, coords, x, y, width, height):
+
+    def __init__(self, coords, x, y, width, height, color, ID):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((coords.width, coords.height))
-        self.color = (gradient_color[0], gradient_color[1], gradient_color[2])
+        self.color = (gradient_color[0], gradient_color[1], gradient_color[2]) if not color else color
         self.image.fill(self.color)
         self.rect = self.image.get_rect()
         self.rect = coords
@@ -104,6 +114,7 @@ class Button(pygame.sprite.Sprite):
         self.y = y
         self.width = width
         self.height = height
+        self.id = ID
         self.active = False
 
     def TouchButton(self, position_mouse):
@@ -122,8 +133,8 @@ class Button(pygame.sprite.Sprite):
                 else:
                     self.active = False
         if self.active:
-            self.image.fill(pygame.Color("green"))
-        else:
+            self.image.fill(pygame.Color("yellow"))
+        if self.id != Position_selected or not self.active:
             self.image.fill(self.color)
 
 class List:
@@ -131,6 +142,7 @@ class List:
         self.y_max = List_rects[len(List_rects) - 1].y + size_block
         self.slided_win = pygame.Surface((WIDTH, self.y_max))
         self.List_main = pygame.Surface((WIDTH + 15 + size_slider_rect, HEIGHT + 10))
+        self.color_button = color_button
         self.x = x
         self.y = y
         self.width = width
@@ -143,9 +155,11 @@ class List:
         self.slider = Slider(x + width + 5, y, size_slider_rect, height, self.List_main, pygame.Color("green"))
 
         if self.Elements:
+            id_but = 0
             for Elem in self.Elements:
                 Gradient(20, 'B', 'R')
-                button = Button(Elem, self.x, self.y, self.width, self.height)
+                id_but += 1
+                button = Button(Elem, self.x, self.y, self.width, self.height, self.color_button, id_but)
                 group.add(button)
 
     def draw(self, color):
@@ -184,7 +198,7 @@ buttons = pygame.sprite.Group()
 List_rects = addElements(count, size_block)
 fileList = ReadDirs(fileList, Link)
 
-getList = List(size_slider, 5, 5, WIDTH, HEIGHT, step_scrol, count, List_rects, GREEN, buttons)
+getList = List(size_slider, 5, 5, WIDTH, HEIGHT, step_scrol, count, List_rects, None, buttons)
 
 
 while True:
@@ -199,6 +213,8 @@ while True:
     pygame.draw.rect(main, GREEN, DownButton)
 
     font = pygame.font.Font(None, 25)
+    degree = DegreePercent(400, 600, 0.125, "D")
+    main.blit(font.render(str(degree), True, GREEN), (250, 300))
 
     for event in pygame.event.get():
         pos = pygame.mouse.get_pos()

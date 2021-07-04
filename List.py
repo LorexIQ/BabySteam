@@ -46,7 +46,7 @@ def ReadDirs(Links, usePath):
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, coords, color, x, y, width, height, ID):
+    def __init__(self, coords, color, x, y, width, height):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((coords.width, coords.height))
         self.image.fill(color)
@@ -56,7 +56,7 @@ class Button(pygame.sprite.Sprite):
         self.y = y
         self.width = width
         self.height = height
-        self.ID = ID
+        self.active = False
 
     def TouchButton(self, position_mouse):
         if position_mouse[0] > self.rect.x + 10 and position_mouse[1] > self.rect.y + 10:
@@ -67,9 +67,16 @@ class Button(pygame.sprite.Sprite):
     def update(self, position_mouse, rects):
         global Position_selected
         if position_mouse[0] > self.rect.x + 10 and position_mouse[1] > self.rect.y + 10:
-            if position_mouse[0] < self.rect.width + 10 and position_mouse[1] < self.rect.y + self.rect.height + 5:
+            if position_mouse[0] < self.rect.width + 10 and position_mouse[1] < self.rect.y + self.rect.height + 10:
                 Position_selected = rects.index(self.rect) + 1
-
+                if not self.active:
+                    self.active = True
+                else:
+                    self.active = False
+        if self.active:
+            self.image.fill(pygame.Color("yellow"))
+        else:
+            self.image.fill(pygame.Color("green"))
 
 class List:
     def __init__(self, win, slider_rect, x, y, width, height, y_max, step, count_elements, Elements, color_button, group):
@@ -89,8 +96,7 @@ class List:
 
         if self.Elements:
             for Elem in self.Elements:
-                index = self.Elements.index(Elem) + 1
-                button = Button(Elem, self.color_but, self.x, self.y, self.width, self.height, index)
+                button = Button(Elem, self.color_but, self.x, self.y, self.width, self.height)
                 group.add(button)
 
     def draw(self, color):
@@ -166,6 +172,7 @@ while True:
                 buttons.update((pos[0], pos_y), List_rects)
                 if Position_selected != -1:
                     print(Position_selected)
+                Position_selected = -1
                 break
 
     pygame.display.flip()

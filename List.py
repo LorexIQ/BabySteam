@@ -3,9 +3,14 @@ import os
 
 WIDTH = 190
 HEIGHT = 340
+count = 200
+Link = "Images"
+fileList = []
+Position_selected = -1
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+GRAY = (200, 200, 200)
 
 pygame.init()
 main = pygame.display.set_mode((400, 400))
@@ -13,8 +18,8 @@ clock = pygame.time.Clock()
 run = False
 
 
-def Rounding(roundin):
-    n = str(int(roundin)) + ".55"
+def Rounding(roundin, accuracy=".55"):
+    n = str(int(roundin)) + accuracy
     n = float(n)
     if roundin > n:
         roundoff = int(roundin) + 1
@@ -41,25 +46,29 @@ def ReadDirs(Links, usePath):
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, coords, color, x, y, width, height):
+    def __init__(self, coords, color, x, y, width, height, ID):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((coords.width, coords.height))
         self.image.fill(color)
         self.rect = self.image.get_rect()
-        self.rect.x = coords.x
-        self.rect.y = coords.y
+        self.rect = coords
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.rect.width = coords.width
-        self.rect.height = coords.height
+        self.ID = ID
 
     def TouchButton(self, position_mouse):
         if position_mouse[0] > self.rect.x + 10 and position_mouse[1] > self.rect.y + 10:
             if position_mouse[0] < self.rect.width + 10 and position_mouse[1] < self.rect.y + self.rect.height + 5:
                 return True
         return False
+
+    def update(self, position_mouse, rects):
+        global Position_selected
+        if position_mouse[0] > self.rect.x + 10 and position_mouse[1] > self.rect.y + 10:
+            if position_mouse[0] < self.rect.width + 10 and position_mouse[1] < self.rect.y + self.rect.height + 5:
+                Position_selected = rects.index(self.rect) + 1
 
 
 class List:
@@ -79,9 +88,9 @@ class List:
         self.group = group
 
         if self.Elements:
-            for i in self.Elements:
-                # pygame.draw.rect(self.slider_rect, color_button, i)
-                button = Button(i, self.color_but, self.x, self.y, self.width, self.height)
+            for Elem in self.Elements:
+                index = self.Elements.index(Elem) + 1
+                button = Button(Elem, self.color_but, self.x, self.y, self.width, self.height, index)
                 group.add(button)
 
     def draw(self, color):
@@ -104,11 +113,8 @@ class List:
                 while self.main_pos_sider_serface + self.y_max < HEIGHT + 5:
                     self.main_pos_sider_serface += 1
 
-    def Action(self):
-        max_el = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / 25))
-        min_el = Rounding(abs((self.main_pos_sider_serface - 5) / 25))
-        avegage_el = self.count_elements - min_el - max_el
-        return min_el, avegage_el, self.main_pos_sider_serface - 5
+    def Indent(self):
+        return self.main_pos_sider_serface - 5
 
     def TouchWindows(self, position_mouse):
         if position_mouse[0] > self.x + 5 and position_mouse[1] > self.y + 5:
@@ -119,13 +125,10 @@ class List:
 
 buttons = pygame.sprite.Group()
 
-count = 20
 List_rects = addElements(count)
 size_list_rect = len(List_rects)
 max_y_list_rect = List_rects[size_list_rect - 1].y + 20
 
-Link = "Images"
-fileList = []
 fileList = ReadDirs(fileList, Link)
 slider_win = pygame.Surface((WIDTH, max_y_list_rect))
 List_main = pygame.Surface((WIDTH + 10, HEIGHT + 10))
@@ -135,13 +138,13 @@ getList = List(List_main, slider_win, 5, 5, WIDTH, HEIGHT, max_y_list_rect, 17, 
 while True:
     main.fill(pygame.Color('white'))
 
-    getList.draw(pygame.Color('gray'))
-    Diapos_slide = getList.Action()
+    getList.draw(GRAY)
+    Indent = getList.Indent()
 
     UpButton = pygame.Rect(300, 100, 50, 50)
-    pygame.draw.rect(main, pygame.Color("green"), UpButton)
+    pygame.draw.rect(main, GREEN, UpButton)
     DownButton = pygame.Rect(300, 160, 50, 50)
-    pygame.draw.rect(main, pygame.Color("green"), DownButton)
+    pygame.draw.rect(main, GREEN, DownButton)
 
     font = pygame.font.Font(None, 25)
 
@@ -154,17 +157,16 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if UpButton.collidepoint(pos):
                 getList.Motion(True)
+                break
             if DownButton.collidepoint(pos):
                 getList.Motion(False)
+                break
             if getList.TouchWindows(pos):
-                Elements_Group = buttons.sprites()
-                pos_y -= Diapos_slide[2]
-                for i in range (Diapos_slide[0], Diapos_slide[0] + Diapos_slide[1]):
-                    One_Element = Elements_Group[i]
-                    if One_Element.TouchButton((pos[0], pos_y)):
-                        print(i + 1)
-                        break
+                pos_y -= Indent
+                buttons.update((pos[0], pos_y), List_rects)
+                if Position_selected != -1:
+                    print(Position_selected)
+                break
 
-    buttons.update()
     pygame.display.flip()
     clock.tick(60)

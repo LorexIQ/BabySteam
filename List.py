@@ -52,26 +52,22 @@ class Button(pygame.sprite.Sprite):
         self.y = y
         self.width = width
         self.height = height
+        self.rect.width = coords.width
+        self.rect.height = coords.height
 
-    def TouchWindows(self, position_mouse):
-        if position_mouse[0] > self.x + 5 and position_mouse[1] > self.y + 5:
-            if position_mouse[0] < self.x + self.width + 5 and position_mouse[1] < self.y + self.height + 5:
-                return True
-        return False
-    
     def TouchButton(self, position_mouse):
-        if position_mouse[0] > self.x + 5 and position_mouse[1] > self.y + 5:
-            if position_mouse[0] < self.x + self.width + 5 and position_mouse[1] < self.y + self.height + 5:
+        if position_mouse[0] > self.rect.x + 10 and position_mouse[1] > self.rect.y + 10:
+            if position_mouse[0] < self.rect.width + 10 and position_mouse[1] < self.rect.y + self.rect.height + 5:
                 return True
         return False
 
 
 class List:
-    def __init__(self, win, slider_rect, x, y, width, heidth, y_max, step, count_elements, Elements, color_button, group):
+    def __init__(self, win, slider_rect, x, y, width, height, y_max, step, count_elements, Elements, color_button, group):
         self.x = x
         self.y = y
         self.width = width
-        self.heidth = heidth
+        self.height = height
         self.win = win
         self.slider_rect = slider_rect
         self.main_pos_sider_serface = 5
@@ -85,7 +81,7 @@ class List:
         if self.Elements:
             for i in self.Elements:
                 # pygame.draw.rect(self.slider_rect, color_button, i)
-                button = Button(i, self.color_but, self.x, self.y, self.width, self.heidth)
+                button = Button(i, self.color_but, self.x, self.y, self.width, self.height)
                 group.add(button)
 
     def draw(self, color):
@@ -94,7 +90,7 @@ class List:
         self.slider_rect.fill(color)
         self.group.draw(self.slider_rect)
         self.win.blit(self.slider_rect, (5, self.main_pos_sider_serface))
-        pygame.draw.rect(self.win, color, (0, 0, self.width + 10, self.heidth + 10), 10)
+        pygame.draw.rect(self.win, color, (0, 0, self.width + 10, self.height + 10), 10)
 
     def Motion(self, position):
         if position:
@@ -109,11 +105,16 @@ class List:
                     self.main_pos_sider_serface += 1
 
     def Action(self):
-        # max_el = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.heidth) / 25))
+        max_el = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / 25))
         min_el = Rounding(abs((self.main_pos_sider_serface - 5) / 25))
-        # avegage_el = self.count_elements - min_el - max_el - кол-во видимых явеек. P.s. должно оставаться одно и то
-        # же значение, иначе вручную подобрать коэф. в функции Rounding (Дебаг строка)
-        return min_el, self.main_pos_sider_serface - 5
+        avegage_el = self.count_elements - min_el - max_el
+        return min_el, avegage_el, self.main_pos_sider_serface - 5
+
+    def TouchWindows(self, position_mouse):
+        if position_mouse[0] > self.x + 5 and position_mouse[1] > self.y + 5:
+            if position_mouse[0] < self.x + self.width + 5 and position_mouse[1] < self.y + self.height + 5:
+                return True
+        return False
 
 
 buttons = pygame.sprite.Group()
@@ -155,12 +156,15 @@ while True:
                 getList.Motion(True)
             if DownButton.collidepoint(pos):
                 getList.Motion(False)
-            lol = buttons.sprites()
-            lol1 = lol[1]
-            if lol1.TouchWindows(pos):
-                print(1)
-            else:
-                print(2)
+            if getList.TouchWindows(pos):
+                Elements_Group = buttons.sprites()
+                pos_y -= Diapos_slide[2]
+                for i in range (Diapos_slide[0], Diapos_slide[0] + Diapos_slide[1]):
+                    One_Element = Elements_Group[i]
+                    if One_Element.TouchButton((pos[0], pos_y)):
+                        print(i + 1)
+                        break
+
     buttons.update()
     pygame.display.flip()
     clock.tick(60)

@@ -76,6 +76,20 @@ def ReadDirs(Links, usePath):
     return Links
 
 
+class Slider:
+    def __init__(self, x, y, width, height, win, color):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.win = win
+        self.color = color
+
+    def draw(self):
+        slider_rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        pygame.draw.rect(self.win, self.color, slider_rect)
+
+
 class Button(pygame.sprite.Sprite):
     def __init__(self, coords, x, y, width, height):
         pygame.sprite.Sprite.__init__(self)
@@ -124,6 +138,7 @@ class List:
         self.count_elements = count_elements
         self.Elements = Elements
         self.group = group
+        self.slider = Slider(x + width + 5, y, 25, height, win, pygame.Color("green"))
 
         if self.Elements:
             for Elem in self.Elements:
@@ -136,7 +151,9 @@ class List:
         self.win.fill(color)
         self.slider_rect.fill(color)
         self.group.draw(self.slider_rect)
+        self.slider.draw()
         self.win.blit(self.slider_rect, (5, self.main_pos_sider_serface))
+
         pygame.draw.rect(self.win, color, (0, 0, self.width + 10, self.height + 10), 10)
 
     def Motion(self, position):

@@ -3,7 +3,7 @@ import os
 
 WIDTH = 190
 HEIGHT = 340
-count = 20
+count = 30
 size_block = 25
 Link = "Images"
 fileList = []
@@ -89,17 +89,24 @@ def ReadDirs(Links, usePath):
 
 
 class Slider:
-    def __init__(self, x, y, width, height, win, color):
+    def __init__(self, x, y, width, height, win, color, under_eae):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.win = win
         self.color = color
+        self.min_range = 30
+        self.max_range = height - under_eae * 10
+        if self.max_range < self.min_range:
+            self.max_range = self.min_range
 
     def draw(self):
-        slider_rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        slider_rect = pygame.Rect(self.x, self.y, self.width, self.max_range)
         pygame.draw.rect(self.win, self.color, slider_rect)
+
+
+
 
 class Button(pygame.sprite.Sprite):
 
@@ -137,6 +144,7 @@ class Button(pygame.sprite.Sprite):
         if self.id != Position_selected or not self.active:
             self.image.fill(self.color)
 
+
 class List:
     def __init__(self, size_slider_rect, x, y, width, height, step, count_elements, Elements, color_button, group):
         self.y_max = List_rects[len(List_rects) - 1].y + size_block
@@ -152,7 +160,9 @@ class List:
         self.count_elements = count_elements
         self.Elements = Elements
         self.group = group
-        self.slider = Slider(x + width + 5, y, size_slider_rect, height, self.List_main, pygame.Color("green"))
+        under_eae = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / size_block)) if count * (size_block + 5) > height - 10 else 0
+        self.slider = Slider(x + width + 5, y, size_slider_rect, height, self.List_main, pygame.Color("green"),
+                             under_eae)
 
         if self.Elements:
             id_but = 0

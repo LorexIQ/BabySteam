@@ -3,7 +3,7 @@ import os
 
 WIDTH = 190
 HEIGHT = 340
-count = 30
+count = 20
 size_block = 25
 Link = "Images"
 fileList = []
@@ -22,6 +22,10 @@ pygame.init()
 main = pygame.display.set_mode((400, 400))
 clock = pygame.time.Clock()
 run = False
+
+
+def Color(color_out):
+    return pygame.Color(color_out)
 
 
 def DegreePercent(first_num, last_num, num, type=""):
@@ -98,14 +102,16 @@ class Slider:
         self.color = color
         self.min_range = 30
         self.max_range = height - under_eae * 10
+        self.position_input = 0
         if self.max_range < self.min_range:
             self.max_range = self.min_range
 
+
     def draw(self):
         slider_rect = pygame.Rect(self.x, self.y, self.width, self.max_range)
+        self.position_output = DegreePercent(self.max_range + 5, self.height + 5, self.position_input, "D")
+        slider_rect.bottom = self.position_output
         pygame.draw.rect(self.win, self.color, slider_rect)
-
-
 
 
 class Button(pygame.sprite.Sprite):
@@ -160,6 +166,8 @@ class List:
         self.step = step
         self.count_elements = count_elements
         self.group = pygame.sprite.Group()
+        self.position_slider = 0
+        self.y_min = self.y_max - self.height
         under_eae = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / size_block)) if count * (size_block + 5) > height - 10 else 0
         self.slider = Slider(x + width + 5, y, size_slider_rect, height, self.List_main, pygame.Color("green"),
                              under_eae)
@@ -167,7 +175,7 @@ class List:
         if self.Elements:
             id_but = 0
             for Elem in self.Elements:
-                Gradient(20, 'B', 'R')
+                Gradient(20, 'G', 'B')
                 id_but += 1
                 button = Button(Elem, self.x, self.y, self.width, self.height, self.color_button, id_but)
                 self.group.add(button)
@@ -177,6 +185,11 @@ class List:
         self.List_main.fill(color)
         self.slided_win.fill(color)
         self.group.draw(self.slided_win)
+        self.position_slider = DegreePercent(self.main_pos_sider_serface + self.height, self.y_max,
+                                             self.height - self.main_pos_sider_serface + 10, "P")
+        if self.position_slider > 1:
+            self.position_slider = 1.0
+        self.slider.position_input = self.position_slider
         self.slider.draw()
         self.List_main.blit(self.slided_win, (5, self.main_pos_sider_serface))
 
@@ -216,7 +229,7 @@ getList = List(size_slider, 5, 5, WIDTH, HEIGHT, step_scrol, count, None)
 
 
 while True:
-    main.fill(pygame.Color('white'))
+    main.fill(Color("white"))
 
     getList.draw(GRAY)
 
@@ -226,8 +239,6 @@ while True:
     pygame.draw.rect(main, GREEN, DownButton)
 
     font = pygame.font.Font(None, 25)
-    degree = DegreePercent(400, 600, 0.125, "D")
-    main.blit(font.render(str(degree), True, GREEN), (250, 300))
 
     for event in pygame.event.get():
         pos = pygame.mouse.get_pos()
@@ -242,8 +253,6 @@ while True:
                 if DownButton.collidepoint(pos):
                     getList.Motion(False)
                     break
-
-
             elif event.button == 4:
                 getList.Motion(True)
                 break
@@ -251,7 +260,6 @@ while True:
                 getList.Motion(False)
                 break
             print(getList.Active(event, pos))
-
 
     pygame.display.flip()
     clock.tick(60)

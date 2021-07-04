@@ -1,1 +1,3 @@
-какая-то инфа
+Tetris
+Tetris custom variation of the famous game
+Tetris is a computer game originally invented and developed by the Soviet programmer Alexei Pajitnov. The game was released on June 6, 1984 - at this time Pajitnov worked at the Computing Center

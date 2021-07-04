@@ -7,7 +7,7 @@ count = 30
 size_block = 25
 Link = "Images"
 fileList = []
-Position_selected = -1
+Position_selected = 0
 size_slider = 25
 step_scrol = 17
 
@@ -135,19 +135,20 @@ class Button(pygame.sprite.Sprite):
         if position_mouse[0] > self.rect.x + 10 and position_mouse[1] > self.rect.y + 10:
             if position_mouse[0] < self.rect.width + 10 and position_mouse[1] < self.rect.y + self.rect.height + 10:
                 Position_selected = rects.index(self.rect) + 1
-                if not self.active:
-                    self.active = True
-                else:
-                    self.active = False
-        if self.active:
+        if self.id == Position_selected and not self.active:
             self.image.fill(pygame.Color("yellow"))
-        if self.id != Position_selected or not self.active:
+            self.active = True
+        elif self.active:
             self.image.fill(self.color)
+            self.active = False
+            if self.id == Position_selected:
+                Position_selected = 0
 
 
 class List:
-    def __init__(self, size_slider_rect, x, y, width, height, step, count_elements, Elements, color_button, group):
-        self.y_max = List_rects[len(List_rects) - 1].y + size_block
+    def __init__(self, size_slider_rect, x, y, width, height, step, count_elements, color_button):
+        self.Elements = addElements(count, size_block)
+        self.y_max = self.Elements[len(self.Elements) - 1].y + size_block
         self.slided_win = pygame.Surface((WIDTH, self.y_max))
         self.List_main = pygame.Surface((WIDTH + 15 + size_slider_rect, HEIGHT + 10))
         self.color_button = color_button
@@ -158,8 +159,7 @@ class List:
         self.main_pos_sider_serface = 5
         self.step = step
         self.count_elements = count_elements
-        self.Elements = Elements
-        self.group = group
+        self.group = pygame.sprite.Group()
         under_eae = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / size_block)) if count * (size_block + 5) > height - 10 else 0
         self.slider = Slider(x + width + 5, y, size_slider_rect, height, self.List_main, pygame.Color("green"),
                              under_eae)
@@ -170,7 +170,7 @@ class List:
                 Gradient(20, 'B', 'R')
                 id_but += 1
                 button = Button(Elem, self.x, self.y, self.width, self.height, self.color_button, id_but)
-                group.add(button)
+                self.group.add(button)
 
     def draw(self, color):
         main.blit(self.List_main, (self.x, self.y))
@@ -194,28 +194,31 @@ class List:
                 while self.main_pos_sider_serface + self.y_max < HEIGHT + 5:
                     self.main_pos_sider_serface += 1
 
-    def Indent(self):
-        return self.main_pos_sider_serface - 5
-
     def TouchWindows(self, position_mouse):
         if position_mouse[0] > self.x + 5 and position_mouse[1] > self.y + 5:
             if position_mouse[0] < self.x + self.width + 5 and position_mouse[1] < self.y + self.height + 5:
                 return True
         return False
 
+    def Active(self, event_list, position_mouse):
+        global Position_selected
+        pos_y = position_mouse[1]
+        if event_list.button == 1:
+            if self.TouchWindows(pos):
+                pos_y -= self.main_pos_sider_serface - 5
+                self.group.update((pos[0], pos_y), self.Elements)
+                if Position_selected != 0:
+                    return Position_selected
 
-buttons = pygame.sprite.Group()
-List_rects = addElements(count, size_block)
+
 fileList = ReadDirs(fileList, Link)
-
-getList = List(size_slider, 5, 5, WIDTH, HEIGHT, step_scrol, count, List_rects, None, buttons)
+getList = List(size_slider, 5, 5, WIDTH, HEIGHT, step_scrol, count, None)
 
 
 while True:
     main.fill(pygame.Color('white'))
 
     getList.draw(GRAY)
-    Indent = getList.Indent()
 
     UpButton = pygame.Rect(300, 100, 50, 50)
     pygame.draw.rect(main, GREEN, UpButton)
@@ -228,7 +231,6 @@ while True:
 
     for event in pygame.event.get():
         pos = pygame.mouse.get_pos()
-        pos_y = pos[1]
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
@@ -240,19 +242,16 @@ while True:
                 if DownButton.collidepoint(pos):
                     getList.Motion(False)
                     break
-                if getList.TouchWindows(pos):
-                    pos_y -= Indent
-                    buttons.update((pos[0], pos_y), List_rects)
-                    if Position_selected != -1:
-                        print(Position_selected)
-                    Position_selected = -1
-                    break
+
+
             elif event.button == 4:
                 getList.Motion(True)
                 break
             elif event.button == 5:
                 getList.Motion(False)
                 break
+            print(getList.Active(event, pos))
+
 
     pygame.display.flip()
     clock.tick(60)

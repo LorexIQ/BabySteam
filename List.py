@@ -160,19 +160,26 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if UpButton.collidepoint(pos):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if UpButton.collidepoint(pos):
+                    getList.Motion(True)
+                    break
+                if DownButton.collidepoint(pos):
+                    getList.Motion(False)
+                    break
+                if getList.TouchWindows(pos):
+                    pos_y -= Indent
+                    buttons.update((pos[0], pos_y), List_rects)
+                    if Position_selected != -1:
+                        print(Position_selected)
+                    Position_selected = -1
+                    break
+            elif event.button == 4:
                 getList.Motion(True)
                 break
-            if DownButton.collidepoint(pos):
+            elif event.button == 5:
                 getList.Motion(False)
-                break
-            if getList.TouchWindows(pos):
-                pos_y -= Indent
-                buttons.update((pos[0], pos_y), List_rects)
-                if Position_selected != -1:
-                    print(Position_selected)
-                Position_selected = -1
                 break
 
     pygame.display.flip()

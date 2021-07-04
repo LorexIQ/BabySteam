@@ -41,13 +41,29 @@ def ReadDirs(Links, usePath):
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, coords, color):
+    def __init__(self, coords, color, x, y, width, height):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((coords.width, coords.height))
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.x = coords.x
         self.rect.y = coords.y
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+    def TouchWindows(self, position_mouse):
+        if position_mouse[0] > self.x + 5 and position_mouse[1] > self.y + 5:
+            if position_mouse[0] < self.x + self.width + 5 and position_mouse[1] < self.y + self.height + 5:
+                return True
+        return False
+    
+    def TouchButton(self, position_mouse):
+        if position_mouse[0] > self.x + 5 and position_mouse[1] > self.y + 5:
+            if position_mouse[0] < self.x + self.width + 5 and position_mouse[1] < self.y + self.height + 5:
+                return True
+        return False
 
 
 class List:
@@ -69,7 +85,7 @@ class List:
         if self.Elements:
             for i in self.Elements:
                 # pygame.draw.rect(self.slider_rect, color_button, i)
-                button = Button(i, self.color_but)
+                button = Button(i, self.color_but, self.x, self.y, self.width, self.heidth)
                 group.add(button)
 
     def draw(self, color):
@@ -139,15 +155,12 @@ while True:
                 getList.Motion(True)
             if DownButton.collidepoint(pos):
                 getList.Motion(False)
-            run = True
-        if run:
-            pos_y -= Diapos_slide[1]
-            for i in range(Diapos_slide[0], Diapos_slide[0] + 14):
-                if List_rects[i].collidepoint((pos[0], pos_y)):
-                    print(List_rects[i].y)
-                    break
-            run = False
-
+            lol = buttons.sprites()
+            lol1 = lol[1]
+            if lol1.TouchWindows(pos):
+                print(1)
+            else:
+                print(2)
     buttons.update()
     pygame.display.flip()
     clock.tick(60)

@@ -8,6 +8,8 @@ size_block = 25
 Link = "Images"
 fileList = []
 Position_selected = -1
+size_slider = 25
+step_scrol = 17
 
 gradient_color = [0, 0, 0]
 status_gradient = True
@@ -125,20 +127,20 @@ class Button(pygame.sprite.Sprite):
             self.image.fill(self.color)
 
 class List:
-    def __init__(self, win, slider_rect, x, y, width, height, y_max, step, count_elements, Elements, color_button, group):
+    def __init__(self, size_slider_rect, x, y, width, height, step, count_elements, Elements, color_button, group):
+        self.y_max = List_rects[len(List_rects) - 1].y + size_block
+        self.slided_win = pygame.Surface((WIDTH, self.y_max))
+        self.List_main = pygame.Surface((WIDTH + 15 + size_slider_rect, HEIGHT + 10))
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.win = win
-        self.slider_rect = slider_rect
         self.main_pos_sider_serface = 5
-        self.y_max = y_max
         self.step = step
         self.count_elements = count_elements
         self.Elements = Elements
         self.group = group
-        self.slider = Slider(x + width + 5, y, 25, height, win, pygame.Color("green"))
+        self.slider = Slider(x + width + 5, y, size_slider_rect, height, self.List_main, pygame.Color("green"))
 
         if self.Elements:
             for Elem in self.Elements:
@@ -147,14 +149,14 @@ class List:
                 group.add(button)
 
     def draw(self, color):
-        main.blit(self.win, (self.x, self.y))
-        self.win.fill(color)
-        self.slider_rect.fill(color)
-        self.group.draw(self.slider_rect)
+        main.blit(self.List_main, (self.x, self.y))
+        self.List_main.fill(color)
+        self.slided_win.fill(color)
+        self.group.draw(self.slided_win)
         self.slider.draw()
-        self.win.blit(self.slider_rect, (5, self.main_pos_sider_serface))
+        self.List_main.blit(self.slided_win, (5, self.main_pos_sider_serface))
 
-        pygame.draw.rect(self.win, color, (0, 0, self.width + 10, self.height + 10), 10)
+        pygame.draw.rect(self.List_main, color, (0, 0, self.width + 10, self.height + 10), 10)
 
     def Motion(self, position):
         if position:
@@ -179,14 +181,10 @@ class List:
 
 
 buttons = pygame.sprite.Group()
-
 List_rects = addElements(count, size_block)
-max_y_list_rect = List_rects[len(List_rects) - 1].y + size_block
-
 fileList = ReadDirs(fileList, Link)
-slider_win = pygame.Surface((WIDTH, max_y_list_rect))
-List_main = pygame.Surface((WIDTH + 40, HEIGHT + 10))
-getList = List(List_main, slider_win, 5, 5, WIDTH, HEIGHT, max_y_list_rect, 17, count, List_rects, GREEN, buttons)
+
+getList = List(size_slider, 5, 5, WIDTH, HEIGHT, step_scrol, count, List_rects, GREEN, buttons)
 
 
 while True:

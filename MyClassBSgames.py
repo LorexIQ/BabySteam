@@ -1,3 +1,10 @@
+import tempfile
+import os
+import zipfile
+import requests
+import subprocess
+
+
 class BSgame(object):
 	def __init__(self, wayGame):
 		f = open(wayGame + '/inf.txt')
@@ -10,15 +17,37 @@ class BSgame(object):
 
 		f = open(wayGame + '/status.txt')
 		if f.read(1) == '0':
-			self.status = False
+			self.__status = False   #приватный
 		else:
-			self.status = True
+			self.__status = True
 		f.close()
 
 		f = open(wayGame + '/links.txt')
-		self.linkLoad = f.readline()[:-1]
-		self.wayExe = f.readline()
+		self.linkLoad = f.readline()
 		f.close
+
+	def startGame(self):
+		if self.__status:
+			os.chdir(self.name)
+			subprocess.Popen(self.name + '.exe')
+
+	def instalGame(self):
+		if not self.__status:
+			response = requests.get(self.linkLoad)
+			file = tempfile.TemporaryFile()
+			file.write(response.content)
+			fzip = zipfile.ZipFile(file)
+			fzip.extractall()
+			file.close()
+			fzip.close()
+
+			self.__status = True
+			f = open(self.way + '/status.txt', 'w')
+			f.write('1')
+			f.close()
+
+	def GetStatus(self):
+		return self.__status
 
 def updateListGame():
 	ListGame = []
@@ -33,14 +62,3 @@ def updateListGame():
 	return ListGame 
 
 
-List = updateListGame()
-
-for l in List:
-	print(l.name)
-	print(l.inf)
-	print(l.way)
-	print(l.wayImg)
-	print(l.status)
-	print(l.linkLoad)
-	print(l.wayExe)
-	print('\n')

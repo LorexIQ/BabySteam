@@ -1,2 +1,1 @@
-lint/to/load
-way/to/exe
+https://github.com/VladisssLuv/GameForBS/raw/main/StarSky.zip

@@ -61,7 +61,10 @@ class BSgame(object):
 def updateListGame():
 	ListGame = []
 
-	f = open('list_games.txt')
+	try:
+		f = open('list_games.txt')
+	except:
+		return ListGame
 	for line in f:
 		if line.endswith('\n'): #если закнчивается на \n
 			line = line[:-1] #переписываем но без последнего символа
@@ -70,7 +73,7 @@ def updateListGame():
 
 	return ListGame 
 
-def updateFromBabySteam(ListGames):
+def updateBabySteam(ListGames):
 	linkUpGames = 'https://github.com/VladisssLuv/GameForBS/raw/main/Games.zip'
 	linkUpList = 'https://raw.githubusercontent.com/VladisssLuv/GameForBS/main/list_games.txt'
 
@@ -93,3 +96,19 @@ def updateFromBabySteam(ListGames):
 		else:
 			f.write('1')
 		f.close()
+
+def installFormRepBS():
+	linkUpGames = 'https://github.com/VladisssLuv/GameForBS/raw/main/Games.zip'
+	linkUpList = 'https://raw.githubusercontent.com/VladisssLuv/GameForBS/main/list_games.txt'
+
+	response = requests.get(linkUpGames)
+	file = tempfile.TemporaryFile()
+	file.write(response.content)
+	fzip = zipfile.ZipFile(file)
+	fzip.extractall()
+	file.close()
+	fzip.close()
+
+	nameList = 'list_games.txt'
+	r = requests.get(linkUpList, allow_redirects=True)
+	open(nameList, 'wb').write(r.content)

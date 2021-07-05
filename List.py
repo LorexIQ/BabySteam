@@ -265,27 +265,13 @@ while True:
 
     getList.draw(GRAY)
 
-    UpButton = pygame.Rect(300, 100, 50, 50)
-    pygame.draw.rect(main, GREEN, UpButton)
-    DownButton = pygame.Rect(300, 160, 50, 50)
-    pygame.draw.rect(main, GREEN, DownButton)
-
-    font = pygame.font.Font(None, 25)
-
     for event in pygame.event.get():
         pos = pygame.mouse.get_pos()
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                if UpButton.collidepoint(pos):
-                    getList.Motion(True)
-                    break
-                if DownButton.collidepoint(pos):
-                    getList.Motion(False)
-                    break
-            elif event.button == 4:
+            if event.button == 4:
                 getList.Motion(True)
                 break
             elif event.button == 5:

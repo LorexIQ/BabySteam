@@ -1,11 +1,11 @@
 import pygame
 import os
+import MyClassBSgames
 
 WIDTH = 190
 HEIGHT = 340
 X_POS = 10
 Y_POS = 10
-count = 40
 size_block = 25
 Link = "Images"
 fileList = []
@@ -77,13 +77,13 @@ def Rounding(roundin, accuracy=".55"):
     return roundoff
 
 
-def addElements(count_el = 0, size=30):
+def addElements(count_el = 0, size=30, width_add=WIDTH):
     board = 0
     Elements = []
     for i in range(count_el):
         if i != 0:
             board += 5
-        Elements.append(pygame.Rect(0, board + size * i, HEIGHT, size))
+        Elements.append(pygame.Rect(0, board + size * i, width_add, size))
     return Elements
 
 
@@ -163,9 +163,8 @@ class Button(pygame.sprite.Sprite):
 
     def update(self, position_mouse, rects):
         global Position_selected
-        if position_mouse[0] > self.rect.x + X_POS + 5 and position_mouse[1] > self.rect.y + Y_POS + 5:
-            if position_mouse[0] < self.rect.width + X_POS + 5 and position_mouse[1] < self.rect.y + self.rect.height + Y_POS + 5:
-                Position_selected = rects.index(self.rect) + 1
+        if self.rect.collidepoint((position_mouse[0] - X_POS - 5, position_mouse[1] - Y_POS - 5)):
+            Position_selected = rects.index(self.rect) + 1
         if self.id == Position_selected and not self.active:
             self.image.fill(pygame.Color("yellow"))
             self.active = True
@@ -177,11 +176,12 @@ class Button(pygame.sprite.Sprite):
 
 
 class List:
-    def __init__(self, size_slider_rect, x, y, width, height, step, count_elements, color_button):
+    def __init__(self, size_slider_rect, x, y, width, height, step, count_elements, color_button, images):
         self.size_slider = size_slider_rect
-        self.Elements = addElements(count, size_block)
-        self.y_max = self.Elements[len(self.Elements) - 1].y + size_block
-        self.slided_win = pygame.Surface((WIDTH, self.y_max))
+        self.y_max = (size_block + 5) * count - 5
+        self.activate_slider = True if self.y_max > x + height else False
+        self.Elements = addElements(count, size_block, WIDTH + ((self.size_slider + 10) if not self.activate_slider else 0))
+        self.slided_win = pygame.Surface((WIDTH + ((self.size_slider + 10) if not self.activate_slider else 0), self.y_max))
         self.List_main = pygame.Surface((WIDTH + 20 + self.size_slider, HEIGHT + 10))
         self.color_button = color_button
         self.x = x
@@ -198,6 +198,7 @@ class List:
         self.slider = Slider(width + 10, 5, self.size_slider, height, self.List_main, pygame.Color("green"),
                              under_eae)
         self.diapos_List = 0
+        self.images = images
 
         if self.Elements:
             id_but = 0
@@ -212,19 +213,20 @@ class List:
         self.List_main.fill(color)
         self.slided_win.fill(color)
         self.group.draw(self.slided_win)
-        if not self.slider.active:
-            self.position_slider = self.diapos_List
-            if self.position_slider > 1:
-                self.position_slider = 1.0
-        else:
-            self.main_pos_sider_serface = self.height - DegreePercent(self.height - 5, self.y_max - 5, self.slider.percent, "D")
-        self.slider.position_input = self.position_slider
-        self.slider.draw()
+        if self.activate_slider:
+            if not self.slider.active:
+                self.position_slider = self.diapos_List
+                if self.position_slider > 1:
+                    self.position_slider = 1.0
+            else:
+                self.main_pos_sider_serface = self.height - DegreePercent(self.height - 5, self.y_max - 5, self.slider.percent, "D")
+            self.slider.position_input = self.position_slider
+            self.diapos_List = DegreePercent(self.height - 5, self.y_max - 5, self.height - self.main_pos_sider_serface, "P")
+            self.slider.draw()
         self.List_main.blit(self.slided_win, (5, self.main_pos_sider_serface))
 
         pygame.draw.rect(self.List_main, color, (0, 0, self.width + self.size_slider + 20, self.height + 10), 10)
-        self.diapos_List = DegreePercent(self.height - 5, self.y_max - 5, self.height - self.main_pos_sider_serface,
-                                    "P")
+
 
     def Motion(self, position):
         if position:
@@ -240,7 +242,8 @@ class List:
 
     def TouchWindows(self, position_mouse):
         if position_mouse[0] > self.x + 5 and position_mouse[1] > self.y + 5:
-            if position_mouse[0] < self.x + self.width + 5 and position_mouse[1] < self.y + self.height + 5:
+            if position_mouse[0] < self.x + self.width + (5 if self.activate_slider else (self.size_slider + 15)) and position_mouse[1] < self.y + self.height + 5:
+                print(1)
                 return True
         return False
 
@@ -257,7 +260,9 @@ class List:
 
 
 fileList = ReadDirs(fileList, Link)
-getList = List(size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, count, None)
+List_images = MyClassBSgames.updateListGame()
+count = len(List_images)
+getList = List(size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, count, None, List_images)
 
 
 while True:
@@ -278,8 +283,8 @@ while True:
                 getList.Motion(False)
                 break
         getList.Active(event, pos)
-        if getList.slider.Active(event, pos):
-            print(1)
+        if getList.activate_slider:
+            getList.slider.Active(event, pos)
 
     pygame.display.flip()
     clock.tick(60)

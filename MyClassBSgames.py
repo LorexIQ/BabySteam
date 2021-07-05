@@ -14,7 +14,8 @@ class BSgame(object):
 		f.close()
 
 		self.way = wayGame
-		self.wayImg = wayGame + '/img.bmp'
+		self.wayImg = wayGame + '/img1.bmp'
+		self.wayImg2 = wayGame + '/img2.bmp'
 
 		f = open(wayGame + '/status.txt')
 		if f.read(1) == '0':
@@ -25,7 +26,7 @@ class BSgame(object):
 
 		f = open(wayGame + '/links.txt')
 		self.linkLoad = f.readline()
-		f.close
+		f.close()
 
 	def startGame(self):
 		if self.__status:

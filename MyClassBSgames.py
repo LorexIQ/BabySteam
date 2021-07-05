@@ -3,6 +3,7 @@ import os
 import zipfile
 import requests
 import subprocess
+import shutil
 
 
 class BSgame(object):
@@ -46,6 +47,15 @@ class BSgame(object):
 			f.write('1')
 			f.close()
 
+	def deleteGame(self):
+		if self.__status:
+			shutil.rmtree(self.name)
+
+			self.__status = False
+			f = open(self.way + '/status.txt', 'w')
+			f.write('0')
+			f.close()
+
 	def GetStatus(self):
 		return self.__status
 
@@ -60,5 +70,3 @@ def updateListGame():
 	f.close()
 
 	return ListGame 
-
-

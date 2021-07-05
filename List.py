@@ -1,14 +1,11 @@
 import pygame
-import os
 import MyClassBSgames
 
 WIDTH = 190
-HEIGHT = 340
+HEIGHT = 570
 X_POS = 10
 Y_POS = 10
 size_block = 35
-Link = "Images"
-fileList = []
 Position_selected = 0
 size_slider = 20
 step_scrol = 17
@@ -20,10 +17,10 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 GRAY = (200, 200, 200)
 DARK_BLUE_ACTIVE = (58, 101, 148)
-DARK_BLUE = (29,51,74)
+DARK_BLUE = (0, 64, 107)
+DARK_BLUE_INACTIVE = (29,51,74)
 
 pygame.init()
-main = pygame.display.set_mode((400, 400))
 clock = pygame.time.Clock()
 run = False
 
@@ -79,7 +76,7 @@ def Rounding(roundin, accuracy=".55"):
     return roundoff
 
 
-def addElements(count_el = 0, size=30, width_add=WIDTH):
+def addElements(count_el = 0, size=30, width_add=None):
     board = 0
     Elements = []
     for i in range(count_el):
@@ -89,15 +86,8 @@ def addElements(count_el = 0, size=30, width_add=WIDTH):
     return Elements
 
 
-def ReadDirs(Links, usePath):
-    for root, dirs, files in os.walk(usePath):
-        for file in files:
-            Links.append(os.path.join(root, file))
-    return Links
-
-
 class Slider:
-    def __init__(self, x, y, width, height, win, color, under_eae):
+    def __init__(self, x, y, width, height, win, color, under_eae, x_pos, y_pos):
         self.x = x
         self.y = y
         self.width = width
@@ -115,6 +105,8 @@ class Slider:
         self.pos_y = None
         self.transmit = None
         self.percent = 0
+        self.x_pos = x_pos
+        self.y_pos = y_pos
 
     def draw(self):
         self.transmit = DegreePercent(self.max_range + 5, self.height + 5, self.position_input, "D")
@@ -131,7 +123,7 @@ class Slider:
         self.percent = DegreePercent(self.max_range + 5, self.height + 5, self.slider_rect.bottom, "P")
 
     def Active(self, event_slider, posinion_mouse):
-        posinion_mouse = (posinion_mouse[0] - X_POS, posinion_mouse[1] - Y_POS)
+        posinion_mouse = (posinion_mouse[0] - self.x_pos, posinion_mouse[1] - self.y_pos)
         if event_slider.type == pygame.MOUSEBUTTONDOWN and event_slider.button == 1:
             if self.slider_rect.collidepoint(posinion_mouse) and not self.active:
                 self.active = True
@@ -143,11 +135,19 @@ class Slider:
 
 class Button(pygame.sprite.Sprite):
 
-    def __init__(self, coords, x, y, width, height, color, ID, img, font, active_slider):
+    def __init__(self, coords, x, y, width, height, color, color_inactive, color_active, color_text, ID, img, font, active_slider, size_block_list, size_slider_rect):
+        self.size_block_list = size_block_list
+        self.status = img.GetStatus()
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((coords.width, coords.height))
         self.color = (gradient_color[0], gradient_color[1], gradient_color[2]) if not color else color
-        self.image.fill(self.color)
+        if self.status:
+            self.image.fill(self.color)
+        else:
+            self.image.fill(color_inactive)
+        self.color_inactive = color_inactive
+        self.color_active = color_active
+        self.color_text = color_text
         self.rect = self.image.get_rect()
         self.rect = coords
         self.x = x
@@ -158,21 +158,21 @@ class Button(pygame.sprite.Sprite):
         self.active = False
         self.font = font
         surface = pygame.image.load(img.wayImg)
-        self.surface = pygame.transform.scale(surface, (size_block - 10, size_block - 10))
+        self.surface = pygame.transform.scale(surface, (self.size_block_list - 10, self.size_block_list - 10))
         self.image.blit(self.surface, (10, 5))
-        self.text = self.font.render(str(img.name), True, GRAY)
+        self.text = self.font.render(str(img.name), True, self.color_text)
         len_text = self.text.get_width()
         backspace = False
-        while len_text > width - size_block - (20 if active_slider else (- size_slider + 5)):
+        while len_text > width - self.size_block_list - (20 if active_slider else (- size_slider_rect + 5)):
             print(len_text, img.name)
             img.name = img.name[:-1]
-            self.text = self.font.render(str(img.name), True, GRAY)
-            len_text = len_text = self.text.get_width()
+            self.text = self.font.render(str(img.name), True, self.color_text)
+            len_text = self.text.get_width()
             backspace = True
         if backspace:
             img.name = img.name[:-1] + "..."
-            self.text = self.font.render(str(img.name), True, GRAY)
-        self.image.blit(self.text, (size_block + 10, size_block / 2 - self.font.size(str(self.text))[1] / 2))
+            self.text = self.font.render(str(img.name), True, self.color_text)
+        self.image.blit(self.text, (self.size_block_list + 10, self.size_block_list / 2 - self.font.size(str(self.text))[1] / 2))
 
     def TouchButton(self, position_mouse):
         if position_mouse[0] > self.rect.x + 10 and position_mouse[1] > self.rect.y + 10:
@@ -182,32 +182,32 @@ class Button(pygame.sprite.Sprite):
 
     def update(self, position_mouse, rects):
         global Position_selected
-        if self.rect.collidepoint((position_mouse[0] - X_POS - 5, position_mouse[1] - Y_POS - 5)):
+        if self.rect.collidepoint((position_mouse[0] - self.x - 5, position_mouse[1] - self.y - 5)):
             Position_selected = rects.index(self.rect) + 1
         if self.id == Position_selected and not self.active:
-            self.image.fill(DARK_BLUE_ACTIVE)
+            self.image.fill(self.color_active)
             self.image.blit(self.surface, (10, 5))
-            self.image.blit(self.text, (size_block + 10, size_block / 2 - self.font.size(str(self.text))[1] / 2))
+            self.image.blit(self.text, (self.size_block_list + 10, self.size_block_list / 2 - self.font.size(str(self.text))[1] / 2))
             self.active = True
         elif self.active:
-            self.image.fill(self.color)
+            self.image.fill(self.color if self.status else self.color_inactive)
             self.image.blit(self.surface, (10, 5))
-            self.image.blit(self.text, (size_block + 10, size_block / 2 - self.font.size(str(self.text))[1] / 2))
+            self.image.blit(self.text, (self.size_block_list + 10, self.size_block_list / 2 - self.font.size(str(self.text))[1] / 2))
             self.active = False
             if self.id == Position_selected:
                 Position_selected = 0
 
 
 class List:
-    def __init__(self, size_slider_rect, x, y, width, height, step, count_elements, color_button, images):
-        self.font = pygame.font.Font('Font\List.ttf', size_block - 15)
+    def __init__(self, size_slider_rect, x, y, width, height, step, count_elements, color_button, color_inactive, color_active, color_text, images, size_block_list):
+        self.size_block_list = size_block_list
+        self.font = pygame.font.Font('Font\List.ttf', self.size_block_list - 15)
         self.size_slider = size_slider_rect
-        self.y_max = (size_block + 5) * count - 5
+        self.y_max = (self.size_block_list + 5) * count - 5
         self.activate_slider = True if self.y_max > x + height else False
-        self.Elements = addElements(count, size_block, WIDTH + ((self.size_slider + 10) if not self.activate_slider else 0))
-        self.slided_win = pygame.Surface((WIDTH + ((self.size_slider + 10) if not self.activate_slider else 0), self.y_max))
-        self.List_main = pygame.Surface((WIDTH + 20 + self.size_slider, HEIGHT + 10))
-        self.color_button = color_button
+        self.Elements = addElements(count, self.size_block_list, width + ((self.size_slider + 10) if not self.activate_slider else 0))
+        self.slided_win = pygame.Surface((width + ((self.size_slider + 10) if not self.activate_slider else 0), self.y_max))
+        self.List_main = pygame.Surface((width + 20 + self.size_slider, height + 10))
         self.x = x
         self.y = y
         self.width = width
@@ -218,9 +218,9 @@ class List:
         self.group = pygame.sprite.Group()
         self.position_slider = 0
         self.y_min = self.y_max - self.height
-        under_eae = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / size_block)) if count * (size_block + 5) > height - 10 else 0
-        self.slider = Slider(width + 10, 5, self.size_slider, height, self.List_main, DARK_BLUE,
-                             under_eae)
+        under_eae = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / self.size_block_list)) if count * (self.size_block_list + 5) > height - 10 else 0
+        self.slider = Slider(width + 10, 5, self.size_slider, height, self.List_main, color_button,
+                             under_eae, self.x, self.y)
         self.diapos_List = 0
         self.images = images
 
@@ -229,7 +229,9 @@ class List:
             for Elem in self.Elements:
                 Gradient(20, 'R', 'G')
                 id_but += 1
-                button = Button(Elem, self.x, self.y, self.width, self.height, self.color_button, id_but, self.images[id_but - 1], self.font, self.activate_slider)
+                button = Button(Elem, self.x, self.y, self.width, self.height, color_button, color_inactive,
+                                color_active, color_text, id_but, self.images[id_but - 1], self.font,
+                                self.activate_slider, self.size_block_list, self.size_slider)
                 self.group.add(button)
 
     def draw(self, color):
@@ -259,9 +261,9 @@ class List:
                 while self.main_pos_sider_serface > 5:
                     self.main_pos_sider_serface -= 1
         else:
-            if self.main_pos_sider_serface + self.y_max > HEIGHT + 5:
+            if self.main_pos_sider_serface + self.y_max > self.height + 5:
                 self.main_pos_sider_serface -= self.step
-                while self.main_pos_sider_serface + self.y_max < HEIGHT + 5:
+                while self.main_pos_sider_serface + self.y_max < self.height + 5:
                     self.main_pos_sider_serface += 1
 
     def TouchWindows(self, position_mouse):
@@ -282,11 +284,20 @@ class List:
                         return Position_selected
 
 
-fileList = ReadDirs(fileList, Link)
+Start_main = pygame.display.set_mode((300, 100), pygame.NOFRAME)
+Start_main.fill(DARK_BLUE_INACTIVE)
+font_loading = pygame.font.Font("Font/List.ttf", 35)
+text_loading = font_loading.render("Loading...", True, GRAY)
+Start_main.blit(text_loading, (Start_main.get_width() / 2 - text_loading.get_width() / 2, Start_main.get_height() / 2 - text_loading.get_height() / 2))
+pygame.display.flip()
+
+List_images = MyClassBSgames.updateListGame()
+MyClassBSgames.updateBabySteam(List_images)
 List_images = MyClassBSgames.updateListGame()
 count = len(List_images)
-getList = List(size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, count, DARK_BLUE, List_images)
+getList = List(size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, count, DARK_BLUE, DARK_BLUE_INACTIVE, DARK_BLUE_ACTIVE, GRAY, List_images, size_block)
 
+main = pygame.display.set_mode((1000, 600))
 
 while True:
     main.fill(Color("white"))
@@ -308,5 +319,6 @@ while True:
         getList.Active(event, pos)
         if getList.activate_slider:
             getList.slider.Active(event, pos)
+
     pygame.display.flip()
     clock.tick(60)

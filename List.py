@@ -3,12 +3,14 @@ import os
 
 WIDTH = 190
 HEIGHT = 340
-count = 20
+X_POS = 10
+Y_POS = 10
+count = 40
 size_block = 25
 Link = "Images"
 fileList = []
 Position_selected = 0
-size_slider = 25
+size_slider = 20
 step_scrol = 17
 
 gradient_color = [0, 0, 0]
@@ -101,18 +103,41 @@ class Slider:
         self.win = win
         self.color = color
         self.min_range = 30
-        self.max_range = height - under_eae * 10
+        self.max_range = height - under_eae * 5
         self.position_input = 0
         if self.max_range < self.min_range:
             self.max_range = self.min_range
-
+        self.active = False
+        self.slider_rect = None
+        self.fixed_y_position = None
+        self.pos_y = None
+        self.transmit = None
+        self.percent = 0
 
     def draw(self):
-        slider_rect = pygame.Rect(self.x, self.y, self.width, self.max_range)
-        self.position_output = DegreePercent(self.max_range + 5, self.height + 5, self.position_input, "D")
-        slider_rect.bottom = self.position_output
-        pygame.draw.rect(self.win, self.color, slider_rect)
+        self.transmit = DegreePercent(self.max_range + 5, self.height + 5, self.position_input, "D")
+        self.slider_rect = pygame.Rect(self.x + 5, self.y, self.width, self.max_range)
+        if not self.active:
+            self.slider_rect.bottom = self.transmit
+        else:
+            self.slider_rect.bottom = self.pos_y + self.transmit - self.fixed_y_position
+            if self.slider_rect.bottom > self.height + 5:
+                self.slider_rect.bottom = self.height + 5
+            elif self.slider_rect.top < self.y:
+                self.slider_rect.top = self.y
+        pygame.draw.rect(self.win, self.color, self.slider_rect)
+        self.percent = DegreePercent(self.max_range + 5, self.height + 5, self.slider_rect.bottom, "P")
 
+    def Active(self, event_slider, posinion_mouse):
+        posinion_mouse = (posinion_mouse[0] - X_POS, posinion_mouse[1] - Y_POS)
+        if event_slider.type == pygame.MOUSEBUTTONDOWN and event_slider.button == 1:
+            if self.slider_rect.collidepoint(posinion_mouse) and not self.active:
+                self.active = True
+                self.fixed_y_position = posinion_mouse[1]
+        elif event_slider.type == pygame.MOUSEBUTTONUP and event_slider.button == 1:
+            self.active = False
+        if self.active:
+            self.pos_y = posinion_mouse[1]
 
 class Button(pygame.sprite.Sprite):
 
@@ -138,8 +163,8 @@ class Button(pygame.sprite.Sprite):
 
     def update(self, position_mouse, rects):
         global Position_selected
-        if position_mouse[0] > self.rect.x + 10 and position_mouse[1] > self.rect.y + 10:
-            if position_mouse[0] < self.rect.width + 10 and position_mouse[1] < self.rect.y + self.rect.height + 10:
+        if position_mouse[0] > self.rect.x + X_POS + 5 and position_mouse[1] > self.rect.y + Y_POS + 5:
+            if position_mouse[0] < self.rect.width + X_POS + 5 and position_mouse[1] < self.rect.y + self.rect.height + Y_POS + 5:
                 Position_selected = rects.index(self.rect) + 1
         if self.id == Position_selected and not self.active:
             self.image.fill(pygame.Color("yellow"))
@@ -153,10 +178,11 @@ class Button(pygame.sprite.Sprite):
 
 class List:
     def __init__(self, size_slider_rect, x, y, width, height, step, count_elements, color_button):
+        self.size_slider = size_slider_rect
         self.Elements = addElements(count, size_block)
         self.y_max = self.Elements[len(self.Elements) - 1].y + size_block
         self.slided_win = pygame.Surface((WIDTH, self.y_max))
-        self.List_main = pygame.Surface((WIDTH + 15 + size_slider_rect, HEIGHT + 10))
+        self.List_main = pygame.Surface((WIDTH + 20 + self.size_slider, HEIGHT + 10))
         self.color_button = color_button
         self.x = x
         self.y = y
@@ -169,8 +195,9 @@ class List:
         self.position_slider = 0
         self.y_min = self.y_max - self.height
         under_eae = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / size_block)) if count * (size_block + 5) > height - 10 else 0
-        self.slider = Slider(x + width + 5, y, size_slider_rect, height, self.List_main, pygame.Color("green"),
+        self.slider = Slider(width + 10, 5, self.size_slider, height, self.List_main, pygame.Color("green"),
                              under_eae)
+        self.diapos_List = 0
 
         if self.Elements:
             id_but = 0
@@ -185,15 +212,19 @@ class List:
         self.List_main.fill(color)
         self.slided_win.fill(color)
         self.group.draw(self.slided_win)
-        self.position_slider = DegreePercent(self.main_pos_sider_serface + self.height, self.y_max,
-                                             self.height - self.main_pos_sider_serface + 10, "P")
-        if self.position_slider > 1:
-            self.position_slider = 1.0
+        if not self.slider.active:
+            self.position_slider = self.diapos_List
+            if self.position_slider > 1:
+                self.position_slider = 1.0
+        else:
+            self.main_pos_sider_serface = self.height - DegreePercent(self.height - 5, self.y_max - 5, self.slider.percent, "D")
         self.slider.position_input = self.position_slider
         self.slider.draw()
         self.List_main.blit(self.slided_win, (5, self.main_pos_sider_serface))
 
-        pygame.draw.rect(self.List_main, color, (0, 0, self.width + 10, self.height + 10), 10)
+        pygame.draw.rect(self.List_main, color, (0, 0, self.width + self.size_slider + 20, self.height + 10), 10)
+        self.diapos_List = DegreePercent(self.height - 5, self.y_max - 5, self.height - self.main_pos_sider_serface,
+                                    "P")
 
     def Motion(self, position):
         if position:
@@ -215,17 +246,18 @@ class List:
 
     def Active(self, event_list, position_mouse):
         global Position_selected
-        pos_y = position_mouse[1]
-        if event_list.button == 1:
-            if self.TouchWindows(pos):
-                pos_y -= self.main_pos_sider_serface - 5
-                self.group.update((pos[0], pos_y), self.Elements)
-                if Position_selected != 0:
-                    return Position_selected
+        if event_list.type == pygame.MOUSEBUTTONDOWN:
+            pos_y = position_mouse[1]
+            if event_list.button == 1:
+                if self.TouchWindows(pos):
+                    pos_y -= self.main_pos_sider_serface - 5
+                    self.group.update((pos[0], pos_y), self.Elements)
+                    if Position_selected != 0:
+                        return Position_selected
 
 
 fileList = ReadDirs(fileList, Link)
-getList = List(size_slider, 5, 5, WIDTH, HEIGHT, step_scrol, count, None)
+getList = List(size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, count, None)
 
 
 while True:
@@ -259,7 +291,9 @@ while True:
             elif event.button == 5:
                 getList.Motion(False)
                 break
-            print(getList.Active(event, pos))
+        getList.Active(event, pos)
+        if getList.slider.Active(event, pos):
+            print(1)
 
     pygame.display.flip()
     clock.tick(60)

@@ -1,10 +1,10 @@
 import pygame
 import List
-#import InformationMenu
+import InformationMenu
 import MyClassBSgames
 
 WIDTH = 190
-HEIGHT = 570
+HEIGHT = 470
 X_POS = 10
 Y_POS = 10
 size_block = 35
@@ -33,16 +33,16 @@ MyClassBSgames.updateBabySteam(List_images)
 List_images = MyClassBSgames.updateListGame()
 count = len(List_images)
 
-main = pygame.display.set_mode((1000, 600))
+main = pygame.display.set_mode((800, 500))
 getList = List.List(main, size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, count, DARK_BLUE, DARK_BLUE_INACTIVE, DARK_BLUE_ACTIVE, GRAY, List_images, size_block)
-#InformationMenu.Initialize(500, 100, 200, 200, GRAY, main)
+InformationMenu.Initialize(250, 10, 540, 400, GRAY, main)
 
 
 while True:
     main.fill(List.Color("white"))
 
     getList.draw(GRAY)
-    #InformationMenu.draw()
+    InformationMenu.draw()
 
     for event in pygame.event.get():
         pos = pygame.mouse.get_pos()

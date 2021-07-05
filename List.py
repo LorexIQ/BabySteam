@@ -1,22 +1,8 @@
 import pygame
 import MyClassBSgames
-import InformationMenu
+#import InformationMenu
 
-WIDTH = 190
-HEIGHT = 570
-X_POS = 10
-Y_POS = 10
-size_block = 35
 Position_selected = 0
-size_slider = 20
-step_scrol = 17
-
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-GRAY = (200, 200, 200)
-DARK_BLUE_ACTIVE = (58, 101, 148)
-DARK_BLUE = (0, 64, 107)
-DARK_BLUE_INACTIVE = (29,51,74)
 
 
 def Color(color_out):
@@ -172,9 +158,9 @@ class List:
         self.size_block_list = size_block_list
         self.font = pygame.font.Font('Font\List.ttf', self.size_block_list - 15)
         self.size_slider = size_slider_rect
-        self.y_max = (self.size_block_list + 5) * count - 5
+        self.y_max = (self.size_block_list + 5) * count_elements - 5
         self.activate_slider = True if self.y_max > x + height else False
-        self.Elements = addElements(count, self.size_block_list, width + ((self.size_slider + 10) if not self.activate_slider else 0))
+        self.Elements = addElements(count_elements, self.size_block_list, width + ((self.size_slider + 10) if not self.activate_slider else 0))
         self.slided_win = pygame.Surface((width + ((self.size_slider + 10) if not self.activate_slider else 0), self.y_max))
         self.List_main = pygame.Surface((width + 20 + self.size_slider, height + 10))
         self.win = win
@@ -188,7 +174,7 @@ class List:
         self.group = pygame.sprite.Group()
         self.position_slider = 0
         self.y_min = self.y_max - self.height
-        under_eae = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / self.size_block_list)) if count * (self.size_block_list + 5) > height - 10 else 0
+        under_eae = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / self.size_block_list)) if count_elements * (self.size_block_list + 5) > height - 10 else 0
         self.slider = Slider(width + 10, 5, self.size_slider, height, self.List_main, color_button,
                              under_eae, self.x, self.y)
         self.diapos_List = 0
@@ -245,54 +231,8 @@ class List:
         if event_list.type == pygame.MOUSEBUTTONDOWN:
             pos_y = position_mouse[1]
             if event_list.button == 1:
-                if self.TouchWindows(pos):
+                if self.TouchWindows(position_mouse):
                     pos_y -= self.main_pos_sider_serface - 5
-                    self.group.update((pos[0], pos_y), self.Elements)
+                    self.group.update((position_mouse[0], pos_y), self.Elements)
                     if Position_selected != 0:
                         return Position_selected
-
-
-pygame.init()
-clock = pygame.time.Clock()
-
-Start_main = pygame.display.set_mode((300, 100), pygame.NOFRAME)
-Start_main.fill(DARK_BLUE_INACTIVE)
-font_loading = pygame.font.Font("Font/List.ttf", 35)
-text_loading = font_loading.render("Loading...", True, GRAY)
-Start_main.blit(text_loading, (Start_main.get_width() / 2 - text_loading.get_width() / 2, Start_main.get_height() / 2 - text_loading.get_height() / 2))
-pygame.display.flip()
-
-List_images = MyClassBSgames.updateListGame()
-MyClassBSgames.updateBabySteam(List_images)
-List_images = MyClassBSgames.updateListGame()
-count = len(List_images)
-
-main = pygame.display.set_mode((1000, 600))
-getList = List(main, size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, count, DARK_BLUE, DARK_BLUE_INACTIVE, DARK_BLUE_ACTIVE, GRAY, List_images, size_block)
-
-InformationMenu.Initialize(500, 100, 200, 200, GRAY, main)
-
-while True:
-    main.fill(Color("white"))
-
-    getList.draw(GRAY)
-    InformationMenu.draw()
-
-    for event in pygame.event.get():
-        pos = pygame.mouse.get_pos()
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            quit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 4:
-                getList.Motion(True)
-                break
-            elif event.button == 5:
-                getList.Motion(False)
-                break
-        getList.Active(event, pos)
-        if getList.activate_slider:
-            getList.slider.Active(event, pos)
-
-    pygame.display.flip()
-    clock.tick(60)

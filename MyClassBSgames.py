@@ -50,7 +50,6 @@ class BSgame(object):
 	def deleteGame(self):
 		if self.__status:
 			shutil.rmtree(self.name)
-
 			self.__status = False
 			f = open(self.way + '/status.txt', 'w')
 			f.write('0')
@@ -70,3 +69,27 @@ def updateListGame():
 	f.close()
 
 	return ListGame 
+
+def updateFromBabySteam(ListGames):
+	linkUpGames = 'https://github.com/VladisssLuv/GameForBS/raw/main/Games.zip'
+	linkUpList = 'https://raw.githubusercontent.com/VladisssLuv/GameForBS/main/list_games.txt'
+
+	response = requests.get(linkUpGames)
+	file = tempfile.TemporaryFile()
+	file.write(response.content)
+	fzip = zipfile.ZipFile(file)
+	fzip.extractall()
+	file.close()
+	fzip.close()
+
+	nameList = 'list_games.txt'
+	r = requests.get(linkUpList, allow_redirects=True)
+	open(nameList, 'wb').write(r.content)
+
+	for game in ListGames:
+		f = open(game.way + '/status.txt', 'w')
+		if not game.GetStatus():
+			f.write('0')
+		else:
+			f.write('1')
+		f.close()

@@ -1,4 +1,4 @@
 Games/StarSky
-Games/Beertruck
 Games/Ghost
 Games/Tetris
+Games/Beertruck

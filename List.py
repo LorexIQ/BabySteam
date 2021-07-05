@@ -6,7 +6,7 @@ WIDTH = 190
 HEIGHT = 340
 X_POS = 10
 Y_POS = 10
-size_block = 25
+size_block = 35
 Link = "Images"
 fileList = []
 Position_selected = 0
@@ -19,6 +19,8 @@ status_gradient = True
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 GRAY = (200, 200, 200)
+DARK_BLUE_ACTIVE = (58, 101, 148)
+DARK_BLUE = (29,51,74)
 
 pygame.init()
 main = pygame.display.set_mode((400, 400))
@@ -141,7 +143,7 @@ class Slider:
 
 class Button(pygame.sprite.Sprite):
 
-    def __init__(self, coords, x, y, width, height, color, ID):
+    def __init__(self, coords, x, y, width, height, color, ID, img, font, active_slider):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((coords.width, coords.height))
         self.color = (gradient_color[0], gradient_color[1], gradient_color[2]) if not color else color
@@ -154,6 +156,23 @@ class Button(pygame.sprite.Sprite):
         self.height = height
         self.id = ID
         self.active = False
+        self.font = font
+        surface = pygame.image.load(img.wayImg)
+        self.surface = pygame.transform.scale(surface, (size_block - 10, size_block - 10))
+        self.image.blit(self.surface, (10, 5))
+        self.text = self.font.render(str(img.name), True, GRAY)
+        len_text = self.text.get_width()
+        backspace = False
+        while len_text > width - size_block - (20 if active_slider else (- size_slider + 5)):
+            print(len_text, img.name)
+            img.name = img.name[:-1]
+            self.text = self.font.render(str(img.name), True, GRAY)
+            len_text = len_text = self.text.get_width()
+            backspace = True
+        if backspace:
+            img.name = img.name[:-1] + "..."
+            self.text = self.font.render(str(img.name), True, GRAY)
+        self.image.blit(self.text, (size_block + 10, size_block / 2 - self.font.size(str(self.text))[1] / 2))
 
     def TouchButton(self, position_mouse):
         if position_mouse[0] > self.rect.x + 10 and position_mouse[1] > self.rect.y + 10:
@@ -166,10 +185,14 @@ class Button(pygame.sprite.Sprite):
         if self.rect.collidepoint((position_mouse[0] - X_POS - 5, position_mouse[1] - Y_POS - 5)):
             Position_selected = rects.index(self.rect) + 1
         if self.id == Position_selected and not self.active:
-            self.image.fill(pygame.Color("yellow"))
+            self.image.fill(DARK_BLUE_ACTIVE)
+            self.image.blit(self.surface, (10, 5))
+            self.image.blit(self.text, (size_block + 10, size_block / 2 - self.font.size(str(self.text))[1] / 2))
             self.active = True
         elif self.active:
             self.image.fill(self.color)
+            self.image.blit(self.surface, (10, 5))
+            self.image.blit(self.text, (size_block + 10, size_block / 2 - self.font.size(str(self.text))[1] / 2))
             self.active = False
             if self.id == Position_selected:
                 Position_selected = 0
@@ -177,6 +200,7 @@ class Button(pygame.sprite.Sprite):
 
 class List:
     def __init__(self, size_slider_rect, x, y, width, height, step, count_elements, color_button, images):
+        self.font = pygame.font.Font('Font\List.ttf', size_block - 15)
         self.size_slider = size_slider_rect
         self.y_max = (size_block + 5) * count - 5
         self.activate_slider = True if self.y_max > x + height else False
@@ -195,7 +219,7 @@ class List:
         self.position_slider = 0
         self.y_min = self.y_max - self.height
         under_eae = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / size_block)) if count * (size_block + 5) > height - 10 else 0
-        self.slider = Slider(width + 10, 5, self.size_slider, height, self.List_main, pygame.Color("green"),
+        self.slider = Slider(width + 10, 5, self.size_slider, height, self.List_main, DARK_BLUE,
                              under_eae)
         self.diapos_List = 0
         self.images = images
@@ -203,9 +227,9 @@ class List:
         if self.Elements:
             id_but = 0
             for Elem in self.Elements:
-                Gradient(20, 'G', 'B')
+                Gradient(20, 'R', 'G')
                 id_but += 1
-                button = Button(Elem, self.x, self.y, self.width, self.height, self.color_button, id_but)
+                button = Button(Elem, self.x, self.y, self.width, self.height, self.color_button, id_but, self.images[id_but - 1], self.font, self.activate_slider)
                 self.group.add(button)
 
     def draw(self, color):
@@ -243,7 +267,6 @@ class List:
     def TouchWindows(self, position_mouse):
         if position_mouse[0] > self.x + 5 and position_mouse[1] > self.y + 5:
             if position_mouse[0] < self.x + self.width + (5 if self.activate_slider else (self.size_slider + 15)) and position_mouse[1] < self.y + self.height + 5:
-                print(1)
                 return True
         return False
 
@@ -262,7 +285,7 @@ class List:
 fileList = ReadDirs(fileList, Link)
 List_images = MyClassBSgames.updateListGame()
 count = len(List_images)
-getList = List(size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, count, None, List_images)
+getList = List(size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, count, DARK_BLUE, List_images)
 
 
 while True:
@@ -285,6 +308,5 @@ while True:
         getList.Active(event, pos)
         if getList.activate_slider:
             getList.slider.Active(event, pos)
-
     pygame.display.flip()
     clock.tick(60)

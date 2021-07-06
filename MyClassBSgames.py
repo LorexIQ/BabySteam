@@ -4,6 +4,7 @@ import zipfile
 import requests
 import subprocess
 import shutil
+import socket
 
 
 class BSgame(object):
@@ -115,8 +116,17 @@ def installFormRepBS():
 	r = requests.get(linkUpList, allow_redirects=True)
 	open(nameList, 'wb').write(r.content)
 
-def Update():
+def Update(mode):
 	List_state = updateListGame()
-	updateBabySteam(List_state)
-	List_state = updateListGame()
+	if mode:
+		updateBabySteam(List_state)
+		List_state = updateListGame()
 	return List_state
+
+def CheckInternet():
+	while True:
+		try:
+			socket.gethostbyaddr('www.yandex.ru')
+		except socket.gaierror:
+			return False
+		return True

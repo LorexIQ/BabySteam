@@ -22,6 +22,7 @@ class Window(object):
         self.Wording()
         self.block_text = []
         self.coords_text = []
+        self.PrintInformation(10, 220)
 
     def draw(self, position_list):
         self.position_list = position_list
@@ -32,7 +33,8 @@ class Window(object):
             self.object = pygame.Surface((self.width, self.height))
             self.object.fill(self.color)
             self.object.blit(self.images[position_list - 1], (10, 10))
-            self.PrintInformation(10, 220)
+            for i in range(len(self.coords_text[position_list - 1])):
+                self.object.blit(self.block_text[position_list - 1][i], self.coords_text[position_list - 1][i])
 
         self.win.blit(self.object, (self.x, self.y))
 
@@ -47,27 +49,26 @@ class Window(object):
             self.words.append(i.split())
 
     def PrintInformation(self, x, y):
-        text_wight = 0
-        text_height = 0
-        block_text = []
-        block_coords = []
-        min_pos = 1
-        for i in self.words[self.position_list - 1]:
-            about = 1
-            block_text.append(self.font.render(str(i), True, pygame.Color("white")))
-            if block_text[-1].get_width() + text_wight > self.width - 20:
-                air = self.width - 20 - block_coords[-1][0] - block_text[-2].get_width()
-                count_words = len(block_text) - min_pos
-                step = air / (count_words - 1)
-                for j in range(min_pos, len(block_coords)):
-                    block_coords[j] = (block_coords[j][0] + step * about, block_coords[j][1])
-                    about += 1
-                min_pos = len(block_text)
-                text_wight = 0
-                text_height += self.font.get_height()
-            block_coords.append((x + text_wight, y + text_height))
-            text_wight += block_text[-1].get_width() + 5
-
-
-        for i in range(len(block_text)):
-            self.object.blit(block_text[i], block_coords[i])
+        for text_i in self.words:
+            text_wight = 0
+            text_height = 0
+            block_text = []
+            block_coords = []
+            min_pos = 1
+            for i in text_i:
+                about = 1
+                block_text.append(self.font.render(str(i), True, pygame.Color("white")))
+                if block_text[-1].get_width() + text_wight > self.width - 20:
+                    air = self.width - 20 - block_coords[-1][0] - block_text[-2].get_width()
+                    count_words = len(block_text) - min_pos
+                    step = air / (count_words - 1)
+                    for j in range(min_pos, len(block_coords)):
+                        block_coords[j] = (block_coords[j][0] + step * about, block_coords[j][1])
+                        about += 1
+                    min_pos = len(block_text)
+                    text_wight = 0
+                    text_height += self.font.get_height()
+                block_coords.append((x + text_wight, y + text_height))
+                text_wight += block_text[-1].get_width() + 5
+            self.block_text.append(block_text)
+            self.coords_text.append(block_coords)

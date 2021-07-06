@@ -89,8 +89,11 @@ class Slider:
 
 class Button(pygame.sprite.Sprite):
 
-    def __init__(self, coords, x, y, width, height, color, color_inactive, color_active, color_text, ID, img, font, active_slider, size_block_list, size_slider_rect):
+    def __init__(self, coords, x, y, width, height, color, color_inactive, color_active, color_text, ID, img, font,
+                 active_slider, size_block_list, size_slider_rect, mode, color_offline):
         self.size_block_list = size_block_list
+        self.color_offline = color_offline
+        self.mode = mode
         self.status = img.GetStatus()
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((coords.width, coords.height))
@@ -98,7 +101,7 @@ class Button(pygame.sprite.Sprite):
         if self.status:
             self.image.fill(self.color)
         else:
-            self.image.fill(color_inactive)
+            self.image.fill(color_inactive if self.mode else color_offline)
         self.color_inactive = color_inactive
         self.color_active = color_active
         self.color_text = color_text
@@ -144,7 +147,7 @@ class Button(pygame.sprite.Sprite):
             self.image.blit(self.text, (self.size_block_list + 10, self.size_block_list / 2 - self.font.size(str(self.text))[1] / 2))
             self.active = True
         elif self.active:
-            self.image.fill(self.color if self.status else self.color_inactive)
+            self.image.fill(self.color if self.status else self.color_inactive if self.mode else self.color_offline)
             self.image.blit(self.surface, (10, 5))
             self.image.blit(self.text, (self.size_block_list + 10, self.size_block_list / 2 - self.font.size(str(self.text))[1] / 2))
             self.active = False
@@ -154,8 +157,10 @@ class Button(pygame.sprite.Sprite):
 
 class List:
     def __init__(self, win, size_slider_rect, x, y, width, height, step, count_elements, color_button, color_inactive,
-                 color_active, color_text, images, size_block_list):
+                 color_active, color_text, images, size_block_list, mode, color_offline):
         self.size_block_list = size_block_list
+        self.mode = mode
+        self.color_offline = color_offline
         self.font = pygame.font.Font('Font\List.ttf', self.size_block_list - 15)
         self.size_slider = size_slider_rect
         self.y_max = (self.size_block_list + 5) * count_elements - 5
@@ -186,7 +191,7 @@ class List:
                 id_but += 1
                 button = Button(Elem, self.x, self.y, self.width, self.height, color_button, color_inactive,
                                 color_active, color_text, id_but, self.images[id_but - 1], self.font,
-                                self.activate_slider, self.size_block_list, self.size_slider)
+                                self.activate_slider, self.size_block_list, self.size_slider, self.mode, self.color_offline)
                 self.group.add(button)
 
     def draw(self, color):

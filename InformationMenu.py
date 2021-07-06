@@ -11,15 +11,16 @@ class Window(object):
         self.color = color
         self.win = win
         self.object = pygame.Surface((self.width, self.height))
-        self.object.fill(color)
+        self.object.fill(self.color)
 
-    def draw(self):
+    def draw(self, position_list):
+        if position_list == 0:
+            self.object = pygame.Surface((self.width, self.height + 60))
+        else:
+            self.object = pygame.Surface((self.width, self.height))
+        self.object.fill(self.color)
         self.win.blit(self.object, (self.x, self.y))
 
-
-def Initialize(x, y, width, height, color, win):
-    global InformationWindow
-    InformationWindow = Window(x, y, width, height, color, win)
 
 def draw():
     InformationWindow.draw()

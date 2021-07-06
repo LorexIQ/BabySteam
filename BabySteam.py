@@ -12,6 +12,10 @@ X_BUTTON = 590
 Y_BUTTON = 440
 WIDTH_BUTTON = 200
 HEIGHT_BUTTON = 50
+X_INFORMATION_WIN = 250
+Y_INFORMATION_WIN = 10
+WIDTH_INFORMATION_WIN = 540
+HEIGHT_INFORMATION_WIN = 420
 size_block = 35
 size_slider = 20
 step_scrol = 17
@@ -43,7 +47,7 @@ count = len(List_images)
 
 main = pygame.display.set_mode((800, 500))
 getList = List.List(main, size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, count, DARK_BLUE, DARK_BLUE_INACTIVE, DARK_BLUE_ACTIVE, GRAY, List_images, size_block)
-InformationMenu.Initialize(250, 10, 540, 420, DARK_BLUE_LIST, main)
+InformationWindow = InformationMenu.Window(X_INFORMATION_WIN, Y_INFORMATION_WIN, WIDTH_INFORMATION_WIN, HEIGHT_INFORMATION_WIN, DARK_BLUE_LIST, main)
 getButton = Buttons.MultiButton(main, X_BUTTON, Y_BUTTON, WIDTH_BUTTON, HEIGHT_BUTTON, List_images, BUTTON_INSTALL, BUTTON_DELETE, BUTTON_RUN)
 
 
@@ -51,8 +55,8 @@ while True:
     main.fill(DARK_BLUE_INACTIVE)
 
     getList.draw(DARK_BLUE_LIST)
-    InformationMenu.draw()
     getButton.draw()
+    InformationWindow.draw(List.Position_selected)
 
     for event in pygame.event.get():
         pos = pygame.mouse.get_pos()

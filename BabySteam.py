@@ -9,9 +9,9 @@ HEIGHT = 470
 X_POS = 10
 Y_POS = 10
 X_BUTTON = 590
-Y_BUTTON = 420
+Y_BUTTON = 440
 WIDTH_BUTTON = 200
-HEIGHT_BUTTON = 70
+HEIGHT_BUTTON = 50
 size_block = 35
 size_slider = 20
 step_scrol = 17
@@ -21,7 +21,11 @@ GREEN = (0, 255, 0)
 GRAY = (200, 200, 200)
 DARK_BLUE_ACTIVE = (58, 101, 148)
 DARK_BLUE = (0, 64, 107)
+DARK_BLUE_LIST = (0, 33, 55)
 DARK_BLUE_INACTIVE = (29,51,74)
+BUTTON_INSTALL = (0, 103, 126)
+BUTTON_DELETE = (200, 0, 0)
+BUTTON_RUN = (0, 128, 0)
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -39,14 +43,14 @@ count = len(List_images)
 
 main = pygame.display.set_mode((800, 500))
 getList = List.List(main, size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, count, DARK_BLUE, DARK_BLUE_INACTIVE, DARK_BLUE_ACTIVE, GRAY, List_images, size_block)
-InformationMenu.Initialize(250, 10, 540, 400, GRAY, main)
-getButton = Buttons.MultiButton(main, X_BUTTON, Y_BUTTON, WIDTH_BUTTON, HEIGHT_BUTTON, List_images)
+InformationMenu.Initialize(250, 10, 540, 420, DARK_BLUE_LIST, main)
+getButton = Buttons.MultiButton(main, X_BUTTON, Y_BUTTON, WIDTH_BUTTON, HEIGHT_BUTTON, List_images, BUTTON_INSTALL, BUTTON_DELETE, BUTTON_RUN)
 
 
 while True:
-    main.fill(List.Color("white"))
+    main.fill(DARK_BLUE_INACTIVE)
 
-    getList.draw(GRAY)
+    getList.draw(DARK_BLUE_LIST)
     InformationMenu.draw()
     getButton.draw()
 

@@ -10,6 +10,8 @@ WIDTH = 190
 HEIGHT = 470
 X_POS = 10
 Y_POS = 10
+WIDTH_WIN = 800
+HEIGHT_WIN = 500
 X_BUTTON = 590
 Y_BUTTON = 440
 WIDTH_BUTTON = 200
@@ -32,7 +34,7 @@ DARK_BLUE = (0, 64, 107)
 DARK_BLUE_LIST = (0, 33, 55)
 DARK_BLUE_INACTIVE = (29,51,74)
 BUTTON_INSTALL = (0, 103, 126)
-BUTTON_DELETE = (200, 0, 0)
+BUTTON_DELETE = (170, 0, 0)
 BUTTON_RUN = (0, 128, 0)
 
 pygame.init()
@@ -57,11 +59,12 @@ if not List_images:
     sys.exit()
 
 Save_Internet = Internet
-main = pygame.display.set_mode((800, 500))
+main = pygame.display.set_mode((WIDTH_WIN, HEIGHT_WIN))
 getList = List.List(main, size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, len(List_images), DARK_BLUE,
                     DARK_BLUE_INACTIVE, DARK_BLUE_ACTIVE, GRAY, List_images, size_block, Internet, GRAY_OFFLINE)
 InformationWindow = InformationMenu.Window(X_INFORMATION_WIN, Y_INFORMATION_WIN, WIDTH_INFORMATION_WIN, HEIGHT_INFORMATION_WIN, DARK_BLUE_LIST, main, List_images)
-getButton = Buttons.MultiButton(main, X_BUTTON, Y_BUTTON, WIDTH_BUTTON, HEIGHT_BUTTON, List_images, BUTTON_INSTALL, BUTTON_DELETE, BUTTON_RUN, GRAY_OFFLINE)
+getButton = Buttons.MultiButton(main, X_BUTTON, Y_BUTTON, WIDTH_BUTTON, HEIGHT_BUTTON, List_images, BUTTON_INSTALL,
+                                BUTTON_DELETE, BUTTON_RUN, GRAY_OFFLINE, GRAY)
 
 while True:
     main.fill(DARK_BLUE_INACTIVE)

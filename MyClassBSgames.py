@@ -61,7 +61,7 @@ class BSgame(object):
 			f = open(self.way + '/status.txt', 'w')
 			f.write('0')
 			f.close()
-			
+
 	def GetStatus(self):
 		return self.__status
 

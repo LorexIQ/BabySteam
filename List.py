@@ -120,15 +120,15 @@ class Button(pygame.sprite.Sprite):
         self.text = self.font.render(str(img.name), True, self.color_text)
         len_text = self.text.get_width()
         backspace = False
+        buffer = img.name
         while len_text > width - self.size_block_list - (20 if active_slider else (- size_slider_rect + 5)):
-            print(len_text, img.name)
-            img.name = img.name[:-1]
-            self.text = self.font.render(str(img.name), True, self.color_text)
+            buffer = buffer[:-1]
+            self.text = self.font.render(str(buffer), True, self.color_text)
             len_text = self.text.get_width()
             backspace = True
         if backspace:
-            img.name = img.name[:-1] + "..."
-            self.text = self.font.render(str(img.name), True, self.color_text)
+            buffer = buffer[:-1] + "..."
+            self.text = self.font.render(str(buffer), True, self.color_text)
         self.image.blit(self.text, (self.size_block_list + 10, self.size_block_list / 2 - self.font.size(str(self.text))[1] / 2))
 
     def TouchButton(self, position_mouse):

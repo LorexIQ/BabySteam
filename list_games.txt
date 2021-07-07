@@ -2,3 +2,7 @@ Games/StarSky
 Games/Ghost
 Games/Tetris
 Games/Beertruck
+Games/AngryBirds
+Games/Klopodrom
+Games/Paleon
+Games/OuterWonders

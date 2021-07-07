@@ -60,6 +60,7 @@ if not List_images:
 
 Save_Internet = Internet
 main = pygame.display.set_mode((WIDTH_WIN, HEIGHT_WIN))
+pygame.display.set_caption("BabySteam")
 getList = List.List(main, size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, len(List_images), DARK_BLUE,
                     DARK_BLUE_INACTIVE, DARK_BLUE_ACTIVE, GRAY, List_images, size_block, Internet, GRAY_OFFLINE)
 InformationWindow = InformationMenu.Window(X_INFORMATION_WIN, Y_INFORMATION_WIN, WIDTH_INFORMATION_WIN, HEIGHT_INFORMATION_WIN, DARK_BLUE_LIST, main, List_images)

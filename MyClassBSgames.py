@@ -31,8 +31,10 @@ class BSgame(object):
 
 	def startGame(self):
 		if self.__status:
+			os.chdir('InstallGames')
 			os.chdir(self.name)
 			subprocess.Popen(self.name + '.exe')
+			os.chdir('..')
 			os.chdir('..')
 
 	def instalGame(self):
@@ -41,7 +43,7 @@ class BSgame(object):
 			file = tempfile.TemporaryFile()
 			file.write(response.content)
 			fzip = zipfile.ZipFile(file)
-			fzip.extractall()
+			fzip.extractall('InstallGames')
 			file.close()
 			fzip.close()
 
@@ -52,12 +54,14 @@ class BSgame(object):
 
 	def deleteGame(self):
 		if self.__status:
+			os.chdir('InstallGames')
 			shutil.rmtree(self.name)
+			os.chdir('..')
 			self.__status = False
 			f = open(self.way + '/status.txt', 'w')
 			f.write('0')
 			f.close()
-
+			
 	def GetStatus(self):
 		return self.__status
 

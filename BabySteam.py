@@ -24,6 +24,7 @@ size_block = 35
 size_slider = 20
 step_scrol = 17
 timer = 0
+action = False
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -70,7 +71,8 @@ getButton = Buttons.MultiButton(main, X_BUTTON, Y_BUTTON, WIDTH_BUTTON, HEIGHT_B
 while True:
     main.fill(DARK_BLUE_INACTIVE)
 
-    getList.draw(DARK_BLUE_LIST)
+    getList.draw(DARK_BLUE_LIST, action)
+    action = False
     getButton.draw(Internet)
     InformationWindow.draw(List.Position_selected)
 
@@ -90,12 +92,14 @@ while True:
             Internet = MyClassBSgames.CheckInternet()
         action = getButton.active(event, pos, List.Position_selected)
         if action or Internet != Save_Internet:
+            save_position_slider = getList.slider.percent
             List_images = MyClassBSgames.Update(Internet)
             getList = List.List(main, size_slider, X_POS, Y_POS, WIDTH, HEIGHT, step_scrol, len(List_images), DARK_BLUE,
                                 DARK_BLUE_INACTIVE, DARK_BLUE_ACTIVE, GRAY, List_images, size_block, Internet, GRAY_OFFLINE)
             getList.group.update(pos, getList.Elements)
+            getList.slider.percent = save_position_slider
         getList.Active(event, pos)
-        if getList.activate_slider:
+        if getList.activate_slider and not action:
             getList.slider.Active(event, pos)
 
     if timer == 60:

@@ -48,7 +48,7 @@ class Slider:
         self.win = win
         self.color = color
         self.min_range = 30
-        self.max_range = height - under_eae * 5
+        self.max_range = height - under_eae * 15 - 10
         self.position_input = 0
         if self.max_range < self.min_range:
             self.max_range = self.min_range
@@ -164,7 +164,7 @@ class List:
         self.font = pygame.font.Font('Font\List.ttf', self.size_block_list - 15)
         self.size_slider = size_slider_rect
         self.y_max = (self.size_block_list + 5) * count_elements - 5
-        self.activate_slider = True if self.y_max > x + height else False
+        self.activate_slider = True if self.y_max > (x + height - 10) else False
         self.Elements = addElements(count_elements, self.size_block_list, width + ((self.size_slider + 10) if not self.activate_slider else 0))
         self.slided_win = pygame.Surface((width + ((self.size_slider + 10) if not self.activate_slider else 0), self.y_max))
         self.List_main = pygame.Surface((width + 20 + self.size_slider, height + 10))
@@ -180,7 +180,7 @@ class List:
         self.position_slider = 0
         self.y_min = self.y_max - self.height
         under_eae = Rounding(abs((self.main_pos_sider_serface - 5 + self.y_max - self.height) / self.size_block_list)) if count_elements * (self.size_block_list + 5) > height - 10 else 0
-        self.slider = Slider(width + 10, 5, self.size_slider, height, self.List_main, color_button,
+        self.slider = Slider(width + 10, 5, self.size_slider, height, self.List_main, color_inactive,
                              under_eae, self.x, self.y)
         self.diapos_List = 0
         self.images = images
@@ -194,7 +194,7 @@ class List:
                                 self.activate_slider, self.size_block_list, self.size_slider, self.mode, self.color_offline)
                 self.group.add(button)
 
-    def draw(self, color):
+    def draw(self, color, sosto):
         self.win.blit(self.List_main, (self.x, self.y))
         self.List_main.fill(color)
         self.slided_win.fill(color)
@@ -207,7 +207,11 @@ class List:
             else:
                 self.main_pos_sider_serface = self.height - DegreePercent(self.height - 5, self.y_max - 5, self.slider.percent, "D")
             self.slider.position_input = self.position_slider
-            self.diapos_List = DegreePercent(self.height - 5, self.y_max - 5, self.height - self.main_pos_sider_serface, "P")
+            if not sosto:
+                self.diapos_List = DegreePercent(self.height - 5, self.y_max - 5, self.height - self.main_pos_sider_serface, "P")
+            else:
+                self.main_pos_sider_serface = self.height - DegreePercent(self.height - 5, self.y_max - 5,
+                                                                          self.slider.percent, "D")
             self.slider.draw()
         self.List_main.blit(self.slided_win, (5, self.main_pos_sider_serface))
         pygame.draw.rect(self.List_main, color, (0, 0, self.width + self.size_slider + 20, self.height + 10), 10)

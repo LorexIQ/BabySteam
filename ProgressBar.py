@@ -39,14 +39,14 @@ class ProgressBar(object):
                             converter(self.progress, self.diapos_download_progress), self.pixels[0],
                             self.download_progress, self.clone_lines[0])
                 if self.progress == 100:
-                    self.progress = self.clone_lines[0]
+                    self.progress = pygame.image.load('Images/InfoDownload/Progress_line_download.png')
                     progress_bool = [False, True]
             if progress_bool[1] and self.progress_archive is not None:
                 changeColor(self.diapos_unpack_progress,
                             converter(self.progress_archive, self.diapos_unpack_progress), self.pixels[1],
                             self.unpack_progress, self.clone_lines[1])
                 if self.progress_archive == 100:
-                    self.unpack_progress = self.clone_lines[1]
+                    self.unpack_progress = self.progress = pygame.image.load('Images/InfoDownload/Progress_line_unpack.png')
                     progress_bool[1] = False
             pygame.time.Clock().tick(10)
 
